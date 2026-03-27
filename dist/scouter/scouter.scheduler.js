@@ -1,0 +1,61 @@
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ScouterScheduler = void 0;
+const common_1 = require("@nestjs/common");
+const schedule_1 = require("@nestjs/schedule");
+const bullmq_1 = require("@nestjs/bullmq");
+const bullmq_2 = require("bullmq");
+let ScouterScheduler = class ScouterScheduler {
+    constructor(scouterQueue) {
+        this.scouterQueue = scouterQueue;
+    }
+    async scheduleScoutAll() {
+        console.log('[Scheduler] Enqueuing scout-all job');
+        await this.scouterQueue.add('scout-all', {});
+    }
+    async scheduleDiscovery() {
+        console.log('[Scheduler] Enqueuing discover job');
+        await this.scouterQueue.add('discover', {});
+    }
+    async scheduleCleanup() {
+        console.log('[Scheduler] Enqueuing cleanup job');
+        await this.scouterQueue.add('cleanup', {});
+    }
+};
+exports.ScouterScheduler = ScouterScheduler;
+__decorate([
+    (0, schedule_1.Cron)('0 */6 * * *'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], ScouterScheduler.prototype, "scheduleScoutAll", null);
+__decorate([
+    (0, schedule_1.Cron)('0 3 * * *'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], ScouterScheduler.prototype, "scheduleDiscovery", null);
+__decorate([
+    (0, schedule_1.Cron)('0 * * * *'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], ScouterScheduler.prototype, "scheduleCleanup", null);
+exports.ScouterScheduler = ScouterScheduler = __decorate([
+    (0, common_1.Injectable)(),
+    __param(0, (0, bullmq_1.InjectQueue)('scouter')),
+    __metadata("design:paramtypes", [bullmq_2.Queue])
+], ScouterScheduler);
+//# sourceMappingURL=scouter.scheduler.js.map
