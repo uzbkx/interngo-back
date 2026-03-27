@@ -16,8 +16,15 @@ async function bootstrap() {
   app.setGlobalPrefix('api/v1');
 
   // CORS
+  const frontendUrl = config.get<string>('FRONTEND_URL', 'http://localhost:3000');
   app.enableCors({
-    origin: config.get<string>('FRONTEND_URL', 'http://localhost:3000'),
+    origin: [
+      frontendUrl,
+      'https://interngo.uz',
+      'https://www.interngo.uz',
+      /\.vercel\.app$/,
+      'http://localhost:3000',
+    ],
     credentials: true,
   });
 
