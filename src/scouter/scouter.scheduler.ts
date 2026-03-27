@@ -1,27 +1,26 @@
 import { Injectable } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
-import { InjectQueue } from '@nestjs/bullmq';
-import { Queue } from 'bullmq';
+import { ScouterService } from './scouter.service';
 
 @Injectable()
 export class ScouterScheduler {
-  constructor(@InjectQueue('scouter') private scouterQueue: Queue) {}
+  constructor(private scouterService: ScouterService) {}
 
   @Cron('0 */6 * * *') // Every 6 hours
   async scheduleScoutAll() {
-    console.log('[Scheduler] Enqueuing scout-all job');
-    await this.scouterQueue.add('scout-all', {});
+    console.log('[Scheduler] Starting scout-all');
+    await this.scouterService.scoutAllSources();
   }
 
   @Cron('0 3 * * *') // Daily at 3 AM
   async scheduleDiscovery() {
-    console.log('[Scheduler] Enqueuing discover job');
-    await this.scouterQueue.add('discover', {});
+    console.log('[Scheduler] Starting discovery');
+    await this.scouterService.runAutoDiscovery();
   }
 
   @Cron('0 * * * *') // Every hour
   async scheduleCleanup() {
-    console.log('[Scheduler] Enqueuing cleanup job');
-    await this.scouterQueue.add('cleanup', {});
+    console.log('[Scheduler] Starting cleanup');
+    await this.scouterService.cleanupExpiredListings();
   }
 }
