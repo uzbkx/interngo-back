@@ -1,11 +1,9 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
-import { CacheModule } from '@nestjs/cache-manager';
 import { BullModule } from '@nestjs/bullmq';
 import { ScheduleModule } from '@nestjs/schedule';
 import { APP_GUARD } from '@nestjs/core';
-import { redisStore } from 'cache-manager-ioredis-yet';
 
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 import { AuthModule } from './auth/auth.module';
@@ -18,6 +16,8 @@ import { AdminModule } from './admin/admin.module';
 import { ScouterModule } from './scouter/scouter.module';
 import { ContactModule } from './contact/contact.module';
 
+const MONGODB_ATLAS = 'mongodb+srv://ahmadjoony:bs55npMweOkjtsF7@cluster0.lg2uevr.mongodb.net/interngo?retryWrites=true&w=majority';
+
 @Module({
   imports: [
     // Config
@@ -27,32 +27,37 @@ import { ContactModule } from './contact/contact.module';
     MongooseModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
-        uri: config.get<string>('MONGODB_URI', 'mongodb://localhost:27017/interngo'),
+        uri: config.get<string>('MONGODB_URI') || MONGODB_ATLAS,
       }),
     }),
 
-    // Redis Cache
-    CacheModule.registerAsync({
-      isGlobal: true,
-      inject: [ConfigService],
-      useFactory: async (config: ConfigService) => ({
-        store: await redisStore({
-          host: config.get<string>('REDIS_HOST', 'localhost'),
-          port: config.get<number>('REDIS_PORT', 6379),
-        }),
-        ttl: 60000, // Default 60s
-      }),
-    }),
-
-    // BullMQ
+    // BullMQ — use Redis if available, otherwise in-memory
     BullModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (config: ConfigService) => ({
-        connection: {
-          host: config.get<string>('REDIS_HOST', 'localhost'),
-          port: config.get<number>('REDIS_PORT', 6379),
-        },
-      }),
+      useFactory: (config: ConfigService) => {
+        const redisHost = config.get<string>('REDIS_HOST');
+        const redisUrl = config.get<string>('REDIS_URL');
+        if (redisUrl) {
+          return { connection: { url: redisUrl } };
+        }
+        if (redisHost && redisHost !== 'localhost') {
+          return {
+            connection: {
+              host: redisHost,
+              port: config.get<number>('REDIS_PORT', 6379),
+            },
+          };
+        }
+        // No Redis — use localhost (will fail gracefully)
+        return {
+          connection: {
+            host: redisHost || '127.0.0.1',
+            port: config.get<number>('REDIS_PORT', 6379),
+            maxRetriesPerRequest: 1,
+            retryStrategy: () => null, // Don't retry
+          },
+        };
+      },
     }),
 
     // Scheduler
@@ -70,7 +75,6 @@ import { ContactModule } from './contact/contact.module';
     ContactModule,
   ],
   providers: [
-    // Global JWT guard — use @Public() to bypass
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,
