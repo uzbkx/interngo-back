@@ -1,4 +1,3 @@
-import { Queue } from 'bullmq';
 import { ScouterService } from './scouter.service';
 import { CreateSourceDto } from './dto/create-source.dto';
 import { RunScoutDto } from './dto/run-scout.dto';
@@ -6,11 +5,19 @@ import { DiscoverSourcesDto } from './dto/discover-sources.dto';
 import { ApproveResultDto } from './dto/approve-result.dto';
 export declare class ScouterController {
     private scouterService;
-    private scouterQueue;
-    constructor(scouterService: ScouterService, scouterQueue: Queue);
+    constructor(scouterService: ScouterService);
     triggerRun(dto: RunScoutDto): Promise<{
-        jobId: string | undefined;
-        message: string;
+        results: import("./scouter.service").ScoutResult[];
+        runId: string;
+    } | {
+        newSourcesAdded: number;
+        runId: string;
+    } | {
+        closedListings: number;
+        results?: undefined;
+    } | {
+        results: import("./scouter.service").ScoutResult[];
+        closedListings?: undefined;
     }>;
     getRuns(): Promise<(import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, import("./schemas/scouter-run.schema").ScouterRun, {}, {}> & import("./schemas/scouter-run.schema").ScouterRun & {
         _id: import("mongoose").Types.ObjectId;
@@ -24,8 +31,8 @@ export declare class ScouterController {
         _id: import("mongoose").Types.ObjectId;
     }>)[]>;
     discover(dto: DiscoverSourcesDto): Promise<{
-        jobId: string | undefined;
-        message: string;
+        newSourcesAdded: number;
+        runId: string;
     }>;
     getSources(): Promise<(import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, import("./schemas/scouted-source.schema").ScoutedSource, {}, {}> & import("./schemas/scouted-source.schema").ScoutedSource & {
         _id: import("mongoose").Types.ObjectId;

@@ -8,8 +8,6 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { InjectQueue } from '@nestjs/bullmq';
-import { Queue } from 'bullmq';
 import { ScouterService } from './scouter.service';
 import { AdminOrSecretGuard } from '../common/guards/admin-or-secret.guard';
 import { CreateSourceDto } from './dto/create-source.dto';
@@ -21,28 +19,24 @@ import { ParseObjectIdPipe } from '../common/pipes/parse-object-id.pipe';
 @Controller('scouter')
 @UseGuards(AdminOrSecretGuard)
 export class ScouterController {
-  constructor(
-    private scouterService: ScouterService,
-    @InjectQueue('scouter') private scouterQueue: Queue,
-  ) {}
+  constructor(private scouterService: ScouterService) {}
 
   @Post('run')
   async triggerRun(@Body() dto: RunScoutDto) {
     if (dto.action === 'discover') {
-      const job = await this.scouterQueue.add('discover', {});
-      return { jobId: job.id, message: 'Discovery job enqueued' };
+      const result = await this.scouterService.runAutoDiscovery();
+      return result;
     }
     if (dto.action === 'cleanup') {
-      const job = await this.scouterQueue.add('cleanup', {});
-      return { jobId: job.id, message: 'Cleanup job enqueued' };
+      const closed = await this.scouterService.cleanupExpiredListings();
+      return { closedListings: closed };
     }
     if (dto.sourceId) {
-      const job = await this.scouterQueue.add('scout-source', { sourceId: dto.sourceId });
-      return { jobId: job.id, message: 'Scout source job enqueued' };
+      const result = await this.scouterService.scoutSource(dto.sourceId);
+      return { results: [result] };
     }
-    // Default: scout all
-    const job = await this.scouterQueue.add('scout-all', {});
-    return { jobId: job.id, message: 'Scout all job enqueued' };
+    const result = await this.scouterService.scoutAllSources();
+    return result;
   }
 
   @Get('runs')
@@ -52,8 +46,7 @@ export class ScouterController {
 
   @Post('discover')
   async discover(@Body() dto: DiscoverSourcesDto) {
-    const job = await this.scouterQueue.add('discover', { topic: dto.topic });
-    return { jobId: job.id, message: 'Discovery job enqueued' };
+    return this.scouterService.runAutoDiscovery();
   }
 
   @Get('sources')

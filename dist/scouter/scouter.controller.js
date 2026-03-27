@@ -14,8 +14,6 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ScouterController = void 0;
 const common_1 = require("@nestjs/common");
-const bullmq_1 = require("@nestjs/bullmq");
-const bullmq_2 = require("bullmq");
 const scouter_service_1 = require("./scouter.service");
 const admin_or_secret_guard_1 = require("../common/guards/admin-or-secret.guard");
 const create_source_dto_1 = require("./dto/create-source.dto");
@@ -24,32 +22,30 @@ const discover_sources_dto_1 = require("./dto/discover-sources.dto");
 const approve_result_dto_1 = require("./dto/approve-result.dto");
 const parse_object_id_pipe_1 = require("../common/pipes/parse-object-id.pipe");
 let ScouterController = class ScouterController {
-    constructor(scouterService, scouterQueue) {
+    constructor(scouterService) {
         this.scouterService = scouterService;
-        this.scouterQueue = scouterQueue;
     }
     async triggerRun(dto) {
         if (dto.action === 'discover') {
-            const job = await this.scouterQueue.add('discover', {});
-            return { jobId: job.id, message: 'Discovery job enqueued' };
+            const result = await this.scouterService.runAutoDiscovery();
+            return result;
         }
         if (dto.action === 'cleanup') {
-            const job = await this.scouterQueue.add('cleanup', {});
-            return { jobId: job.id, message: 'Cleanup job enqueued' };
+            const closed = await this.scouterService.cleanupExpiredListings();
+            return { closedListings: closed };
         }
         if (dto.sourceId) {
-            const job = await this.scouterQueue.add('scout-source', { sourceId: dto.sourceId });
-            return { jobId: job.id, message: 'Scout source job enqueued' };
+            const result = await this.scouterService.scoutSource(dto.sourceId);
+            return { results: [result] };
         }
-        const job = await this.scouterQueue.add('scout-all', {});
-        return { jobId: job.id, message: 'Scout all job enqueued' };
+        const result = await this.scouterService.scoutAllSources();
+        return result;
     }
     getRuns() {
         return this.scouterService.getRuns();
     }
     async discover(dto) {
-        const job = await this.scouterQueue.add('discover', { topic: dto.topic });
-        return { jobId: job.id, message: 'Discovery job enqueued' };
+        return this.scouterService.runAutoDiscovery();
     }
     getSources() {
         return this.scouterService.getSources();
@@ -116,8 +112,6 @@ __decorate([
 exports.ScouterController = ScouterController = __decorate([
     (0, common_1.Controller)('scouter'),
     (0, common_1.UseGuards)(admin_or_secret_guard_1.AdminOrSecretGuard),
-    __param(1, (0, bullmq_1.InjectQueue)('scouter')),
-    __metadata("design:paramtypes", [scouter_service_1.ScouterService,
-        bullmq_2.Queue])
+    __metadata("design:paramtypes", [scouter_service_1.ScouterService])
 ], ScouterController);
 //# sourceMappingURL=scouter.controller.js.map
