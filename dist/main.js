@@ -35,9 +35,9 @@ async function bootstrap() {
         .build();
     const document = swagger_1.SwaggerModule.createDocument(app, swaggerConfig);
     swagger_1.SwaggerModule.setup('api/docs', app, document);
-    const port = config.get('PORT', 3001);
-    await app.listen(port);
-    console.log(`InternGo API running on http://localhost:${port}/api/v1`);
+    const port = config.get('PORT', 8080);
+    await app.listen(port, '0.0.0.0');
+    console.log(`InternGo API running on port ${port}`);
 }
 bootstrap();
 //# sourceMappingURL=main.js.map

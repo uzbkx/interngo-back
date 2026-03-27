@@ -47,8 +47,8 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('api/docs', app, document);
 
-  const port = config.get<number>('PORT', 3001);
-  await app.listen(port);
-  console.log(`InternGo API running on http://localhost:${port}/api/v1`);
+  const port = config.get<number>('PORT', 8080);
+  await app.listen(port, '0.0.0.0');
+  console.log(`InternGo API running on port ${port}`);
 }
 bootstrap();
