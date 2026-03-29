@@ -16,21 +16,15 @@ exports.ListingsService = void 0;
 const common_1 = require("@nestjs/common");
 const mongoose_1 = require("@nestjs/mongoose");
 const mongoose_2 = require("mongoose");
-const cache_manager_1 = require("@nestjs/cache-manager");
 const listing_schema_1 = require("./schemas/listing.schema");
 let ListingsService = class ListingsService {
-    constructor(listingModel, cache) {
+    constructor(listingModel) {
         this.listingModel = listingModel;
-        this.cache = cache;
     }
     async findPublished(query) {
         const page = parseInt(query.page || '1', 10);
         const limit = parseInt(query.limit || '20', 10);
         const skip = (page - 1) * limit;
-        const cacheKey = `listings:${query.type || 'all'}:${query.q || ''}:${page}:${limit}`;
-        const cached = await this.cache.get(cacheKey);
-        if (cached)
-            return cached;
         const filter = { status: listing_schema_1.ListingStatus.PUBLISHED };
         if (query.type)
             filter.type = query.type;
@@ -49,21 +43,14 @@ let ListingsService = class ListingsService {
                 .populate('organizationId'),
             this.listingModel.countDocuments(filter),
         ]);
-        const result = { listings, total, page, limit, totalPages: Math.ceil(total / limit) };
-        await this.cache.set(cacheKey, result, 60000);
-        return result;
+        return { listings, total, page, limit, totalPages: Math.ceil(total / limit) };
     }
     async findBySlug(slug) {
-        const cacheKey = `listing:slug:${slug}`;
-        const cached = await this.cache.get(cacheKey);
-        if (cached)
-            return cached;
         const listing = await this.listingModel
             .findOne({ slug })
             .populate('organizationId');
         if (!listing)
             throw new common_1.NotFoundException('Listing not found');
-        await this.cache.set(cacheKey, listing, 300000);
         return listing;
     }
     async findById(id) {
@@ -82,41 +69,34 @@ let ListingsService = class ListingsService {
         const slug = this.slugify(dto.title);
         const existing = await this.listingModel.findOne({ slug });
         const finalSlug = existing ? `${slug}-${Date.now().toString(36)}` : slug;
-        const listing = await this.listingModel.create({
+        return this.listingModel.create({
             ...dto,
             slug: finalSlug,
             deadline: dto.deadline ? new Date(dto.deadline) : undefined,
             startDate: dto.startDate ? new Date(dto.startDate) : undefined,
             endDate: dto.endDate ? new Date(dto.endDate) : undefined,
         });
-        await this.invalidateCache();
-        return listing;
     }
     async update(id, dto) {
         const listing = await this.listingModel.findByIdAndUpdate(id, dto, { new: true });
         if (!listing)
             throw new common_1.NotFoundException('Listing not found');
-        await this.invalidateCache();
         return listing;
     }
     async approve(id) {
         const listing = await this.listingModel.findByIdAndUpdate(id, { status: listing_schema_1.ListingStatus.PUBLISHED }, { new: true });
         if (!listing)
             throw new common_1.NotFoundException('Listing not found');
-        await this.invalidateCache();
         return listing;
     }
     async remove(id) {
         const listing = await this.listingModel.findByIdAndDelete(id);
         if (!listing)
             throw new common_1.NotFoundException('Listing not found');
-        await this.invalidateCache();
         return { deleted: true };
     }
     async closeExpired() {
         const result = await this.listingModel.updateMany({ deadline: { $lt: new Date() }, status: listing_schema_1.ListingStatus.PUBLISHED }, { status: listing_schema_1.ListingStatus.CLOSED });
-        if (result.modifiedCount > 0)
-            await this.invalidateCache();
         return result.modifiedCount;
     }
     slugify(text) {
@@ -127,15 +107,11 @@ let ListingsService = class ListingsService {
             .replace(/-+/g, '-')
             .trim();
     }
-    async invalidateCache() {
-        await this.cache.reset?.() || this.cache.del('listings:*');
-    }
 };
 exports.ListingsService = ListingsService;
 exports.ListingsService = ListingsService = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, mongoose_1.InjectModel)(listing_schema_1.Listing.name)),
-    __param(1, (0, common_1.Inject)(cache_manager_1.CACHE_MANAGER)),
-    __metadata("design:paramtypes", [mongoose_2.Model, Object])
+    __metadata("design:paramtypes", [mongoose_2.Model])
 ], ListingsService);
 //# sourceMappingURL=listings.service.js.map

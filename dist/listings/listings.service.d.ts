@@ -1,15 +1,39 @@
 import { Model } from 'mongoose';
-import { Cache } from 'cache-manager';
 import { Listing, ListingDocument } from './schemas/listing.schema';
 import { CreateListingDto } from './dto/create-listing.dto';
 import { UpdateListingDto } from './dto/update-listing.dto';
 import { QueryListingsDto } from './dto/query-listings.dto';
 export declare class ListingsService {
     private listingModel;
-    private cache;
-    constructor(listingModel: Model<ListingDocument>, cache: Cache);
-    findPublished(query: QueryListingsDto): Promise<{}>;
-    findBySlug(slug: string): Promise<{}>;
+    constructor(listingModel: Model<ListingDocument>);
+    findPublished(query: QueryListingsDto): Promise<{
+        listings: (import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Listing, {}, {}> & Listing & {
+            _id: import("mongoose").Types.ObjectId;
+        } & {
+            __v: number;
+        }, {}, {}> & import("mongoose").Document<unknown, {}, Listing, {}, {}> & Listing & {
+            _id: import("mongoose").Types.ObjectId;
+        } & {
+            __v: number;
+        } & Required<{
+            _id: import("mongoose").Types.ObjectId;
+        }>)[];
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+    }>;
+    findBySlug(slug: string): Promise<import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Listing, {}, {}> & Listing & {
+        _id: import("mongoose").Types.ObjectId;
+    } & {
+        __v: number;
+    }, {}, {}> & import("mongoose").Document<unknown, {}, Listing, {}, {}> & Listing & {
+        _id: import("mongoose").Types.ObjectId;
+    } & {
+        __v: number;
+    } & Required<{
+        _id: import("mongoose").Types.ObjectId;
+    }>>;
     findById(id: string): Promise<import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Listing, {}, {}> & Listing & {
         _id: import("mongoose").Types.ObjectId;
     } & {
@@ -70,5 +94,4 @@ export declare class ListingsService {
     }>;
     closeExpired(): Promise<number>;
     private slugify;
-    private invalidateCache;
 }
