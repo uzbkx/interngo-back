@@ -99,6 +99,42 @@ let ListingsService = class ListingsService {
         const result = await this.listingModel.updateMany({ deadline: { $lt: new Date() }, status: listing_schema_1.ListingStatus.PUBLISHED }, { status: listing_schema_1.ListingStatus.CLOSED });
         return result.modifiedCount;
     }
+    async archiveOld() {
+        const fifteenDaysAgo = new Date();
+        fifteenDaysAgo.setDate(fifteenDaysAgo.getDate() - 15);
+        const result = await this.listingModel.updateMany({
+            status: listing_schema_1.ListingStatus.CLOSED,
+            deadline: { $lt: fifteenDaysAgo },
+        }, { status: listing_schema_1.ListingStatus.ARCHIVED });
+        if (result.modifiedCount > 0) {
+            console.log(`[Listings] Archived ${result.modifiedCount} old listings`);
+        }
+        return result.modifiedCount;
+    }
+    async findArchived(query) {
+        const page = parseInt(query.page || '1', 10);
+        const limit = parseInt(query.limit || '20', 10);
+        const skip = (page - 1) * limit;
+        const filter = { status: { $in: [listing_schema_1.ListingStatus.CLOSED, listing_schema_1.ListingStatus.ARCHIVED] } };
+        if (query.type)
+            filter.type = query.type;
+        if (query.q) {
+            filter.$or = [
+                { title: { $regex: query.q, $options: 'i' } },
+                { description: { $regex: query.q, $options: 'i' } },
+            ];
+        }
+        const [listings, total] = await Promise.all([
+            this.listingModel
+                .find(filter)
+                .sort({ deadline: -1 })
+                .skip(skip)
+                .limit(limit)
+                .populate('organizationId'),
+            this.listingModel.countDocuments(filter),
+        ]);
+        return { listings, total, page, limit, totalPages: Math.ceil(total / limit) };
+    }
     slugify(text) {
         return text
             .toLowerCase()

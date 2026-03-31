@@ -1,10 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import { ScouterService } from './scouter.service';
+import { ListingsService } from '../listings/listings.service';
 
 @Injectable()
 export class ScouterScheduler {
-  constructor(private scouterService: ScouterService) {}
+  constructor(
+    private scouterService: ScouterService,
+    private listingsService: ListingsService,
+  ) {}
 
   @Cron('0 */6 * * *') // Every 6 hours
   async scheduleScoutAll() {
@@ -21,6 +25,10 @@ export class ScouterScheduler {
   @Cron('0 * * * *') // Every hour
   async scheduleCleanup() {
     console.log('[Scheduler] Starting cleanup');
-    await this.scouterService.cleanupExpiredListings();
+    const closed = await this.listingsService.closeExpired();
+    const archived = await this.listingsService.archiveOld();
+    if (closed > 0 || archived > 0) {
+      console.log(`[Scheduler] Closed: ${closed}, Archived: ${archived}`);
+    }
   }
 }

@@ -93,5 +93,23 @@ export declare class ListingsService {
         deleted: boolean;
     }>;
     closeExpired(): Promise<number>;
+    archiveOld(): Promise<number>;
+    findArchived(query: QueryListingsDto): Promise<{
+        listings: (import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, Listing, {}, {}> & Listing & {
+            _id: import("mongoose").Types.ObjectId;
+        } & {
+            __v: number;
+        }, {}, {}> & import("mongoose").Document<unknown, {}, Listing, {}, {}> & Listing & {
+            _id: import("mongoose").Types.ObjectId;
+        } & {
+            __v: number;
+        } & Required<{
+            _id: import("mongoose").Types.ObjectId;
+        }>)[];
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+    }>;
     private slugify;
 }

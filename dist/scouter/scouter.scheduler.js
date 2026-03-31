@@ -13,9 +13,11 @@ exports.ScouterScheduler = void 0;
 const common_1 = require("@nestjs/common");
 const schedule_1 = require("@nestjs/schedule");
 const scouter_service_1 = require("./scouter.service");
+const listings_service_1 = require("../listings/listings.service");
 let ScouterScheduler = class ScouterScheduler {
-    constructor(scouterService) {
+    constructor(scouterService, listingsService) {
         this.scouterService = scouterService;
+        this.listingsService = listingsService;
     }
     async scheduleScoutAll() {
         console.log('[Scheduler] Starting scout-all');
@@ -27,7 +29,11 @@ let ScouterScheduler = class ScouterScheduler {
     }
     async scheduleCleanup() {
         console.log('[Scheduler] Starting cleanup');
-        await this.scouterService.cleanupExpiredListings();
+        const closed = await this.listingsService.closeExpired();
+        const archived = await this.listingsService.archiveOld();
+        if (closed > 0 || archived > 0) {
+            console.log(`[Scheduler] Closed: ${closed}, Archived: ${archived}`);
+        }
     }
 };
 exports.ScouterScheduler = ScouterScheduler;
@@ -51,6 +57,7 @@ __decorate([
 ], ScouterScheduler.prototype, "scheduleCleanup", null);
 exports.ScouterScheduler = ScouterScheduler = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [scouter_service_1.ScouterService])
+    __metadata("design:paramtypes", [scouter_service_1.ScouterService,
+        listings_service_1.ListingsService])
 ], ScouterScheduler);
 //# sourceMappingURL=scouter.scheduler.js.map

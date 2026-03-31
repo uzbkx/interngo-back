@@ -39,6 +39,14 @@ export class ListingsController {
     res.json(data);
   }
 
+  @Public()
+  @Get('archive')
+  async findArchived(@Query() query: QueryListingsDto, @Res() res: Response) {
+    const data = await this.listingsService.findArchived(query);
+    res.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600');
+    res.json(data);
+  }
+
   @Post()
   create(@Body() dto: CreateListingDto) {
     return this.listingsService.create(dto);

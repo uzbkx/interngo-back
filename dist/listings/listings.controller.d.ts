@@ -8,6 +8,7 @@ export declare class ListingsController {
     constructor(listingsService: ListingsService);
     findAll(query: QueryListingsDto, res: Response): Promise<void>;
     findBySlug(slug: string, res: Response): Promise<void>;
+    findArchived(query: QueryListingsDto, res: Response): Promise<void>;
     create(dto: CreateListingDto): Promise<import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, import("./schemas/listing.schema").Listing, {}, {}> & import("./schemas/listing.schema").Listing & {
         _id: import("mongoose").Types.ObjectId;
     } & {

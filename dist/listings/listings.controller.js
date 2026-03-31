@@ -35,6 +35,11 @@ let ListingsController = class ListingsController {
         res.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600');
         res.json(data);
     }
+    async findArchived(query, res) {
+        const data = await this.listingsService.findArchived(query);
+        res.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600');
+        res.json(data);
+    }
     create(dto) {
         return this.listingsService.create(dto);
     }
@@ -67,6 +72,15 @@ __decorate([
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], ListingsController.prototype, "findBySlug", null);
+__decorate([
+    (0, public_decorator_1.Public)(),
+    (0, common_1.Get)('archive'),
+    __param(0, (0, common_1.Query)()),
+    __param(1, (0, common_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [query_listings_dto_1.QueryListingsDto, Object]),
+    __metadata("design:returntype", Promise)
+], ListingsController.prototype, "findArchived", null);
 __decorate([
     (0, common_1.Post)(),
     __param(0, (0, common_1.Body)()),
