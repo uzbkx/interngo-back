@@ -5,10 +5,12 @@ const common_1 = require("@nestjs/common");
 const config_1 = require("@nestjs/config");
 const swagger_1 = require("@nestjs/swagger");
 const cookieParser = require("cookie-parser");
+const compression = require("compression");
 const app_module_1 = require("./app.module");
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
     const config = app.get(config_1.ConfigService);
+    app.use(compression());
     app.use(cookieParser());
     app.setGlobalPrefix('api/v1');
     const frontendUrl = config.get('FRONTEND_URL', 'http://localhost:3000');

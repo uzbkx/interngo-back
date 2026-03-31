@@ -25,11 +25,15 @@ let ListingsController = class ListingsController {
     constructor(listingsService) {
         this.listingsService = listingsService;
     }
-    findAll(query) {
-        return this.listingsService.findPublished(query);
+    async findAll(query, res) {
+        const data = await this.listingsService.findPublished(query);
+        res.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
+        res.json(data);
     }
-    findBySlug(slug) {
-        return this.listingsService.findBySlug(slug);
+    async findBySlug(slug, res) {
+        const data = await this.listingsService.findBySlug(slug);
+        res.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600');
+        res.json(data);
     }
     create(dto) {
         return this.listingsService.create(dto);
@@ -49,17 +53,19 @@ __decorate([
     (0, public_decorator_1.Public)(),
     (0, common_1.Get)(),
     __param(0, (0, common_1.Query)()),
+    __param(1, (0, common_1.Res)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [query_listings_dto_1.QueryListingsDto]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [query_listings_dto_1.QueryListingsDto, Object]),
+    __metadata("design:returntype", Promise)
 ], ListingsController.prototype, "findAll", null);
 __decorate([
     (0, public_decorator_1.Public)(),
     (0, common_1.Get)(':slug'),
     __param(0, (0, common_1.Param)('slug')),
+    __param(1, (0, common_1.Res)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
 ], ListingsController.prototype, "findBySlug", null);
 __decorate([
     (0, common_1.Post)(),

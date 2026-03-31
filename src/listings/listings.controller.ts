@@ -8,7 +8,9 @@ import {
   Param,
   Query,
   UseGuards,
+  Res,
 } from '@nestjs/common';
+import { Response } from 'express';
 import { ListingsService } from './listings.service';
 import { CreateListingDto } from './dto/create-listing.dto';
 import { UpdateListingDto } from './dto/update-listing.dto';
@@ -23,14 +25,18 @@ export class ListingsController {
 
   @Public()
   @Get()
-  findAll(@Query() query: QueryListingsDto) {
-    return this.listingsService.findPublished(query);
+  async findAll(@Query() query: QueryListingsDto, @Res() res: Response) {
+    const data = await this.listingsService.findPublished(query);
+    res.set('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=300');
+    res.json(data);
   }
 
   @Public()
   @Get(':slug')
-  findBySlug(@Param('slug') slug: string) {
-    return this.listingsService.findBySlug(slug);
+  async findBySlug(@Param('slug') slug: string, @Res() res: Response) {
+    const data = await this.listingsService.findBySlug(slug);
+    res.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600');
+    res.json(data);
   }
 
   @Post()
