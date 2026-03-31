@@ -10,19 +10,19 @@ export class ScouterScheduler {
     private listingsService: ListingsService,
   ) {}
 
-  @Cron('0 */6 * * *') // Every 6 hours
+  @Cron('0 * * * *') // Every hour — scout all sources
   async scheduleScoutAll() {
     console.log('[Scheduler] Starting scout-all');
     await this.scouterService.scoutAllSources();
   }
 
-  @Cron('0 3 * * *') // Daily at 3 AM
+  @Cron('0 */12 * * *') // Every 12 hours — discover new sources
   async scheduleDiscovery() {
     console.log('[Scheduler] Starting discovery');
     await this.scouterService.runAutoDiscovery();
   }
 
-  @Cron('0 * * * *') // Every hour
+  @Cron('30 * * * *') // Every hour at :30 — cleanup
   async scheduleCleanup() {
     console.log('[Scheduler] Starting cleanup');
     const closed = await this.listingsService.closeExpired();

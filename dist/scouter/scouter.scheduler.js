@@ -38,19 +38,19 @@ let ScouterScheduler = class ScouterScheduler {
 };
 exports.ScouterScheduler = ScouterScheduler;
 __decorate([
-    (0, schedule_1.Cron)('0 */6 * * *'),
+    (0, schedule_1.Cron)('0 * * * *'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], ScouterScheduler.prototype, "scheduleScoutAll", null);
 __decorate([
-    (0, schedule_1.Cron)('0 3 * * *'),
+    (0, schedule_1.Cron)('0 */12 * * *'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], ScouterScheduler.prototype, "scheduleDiscovery", null);
 __decorate([
-    (0, schedule_1.Cron)('0 * * * *'),
+    (0, schedule_1.Cron)('30 * * * *'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
