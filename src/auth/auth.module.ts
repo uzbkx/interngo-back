@@ -5,16 +5,8 @@ import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { GoogleStrategy } from './strategies/google.strategy';
 import { UsersModule } from '../users/users.module';
-
-// Conditionally load Google strategy only if credentials exist
-const optionalProviders: any[] = [];
-try {
-  if (process.env.GOOGLE_CLIENT_ID) {
-    const { GoogleStrategy } = require('./strategies/google.strategy');
-    optionalProviders.push(GoogleStrategy);
-  }
-} catch {}
 
 @Module({
   imports: [
@@ -28,7 +20,7 @@ try {
       }),
     }),
   ],
-  providers: [AuthService, JwtStrategy, ...optionalProviders],
+  providers: [AuthService, JwtStrategy, GoogleStrategy],
   controllers: [AuthController],
   exports: [AuthService],
 })

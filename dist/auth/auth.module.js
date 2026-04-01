@@ -14,15 +14,8 @@ const config_1 = require("@nestjs/config");
 const auth_service_1 = require("./auth.service");
 const auth_controller_1 = require("./auth.controller");
 const jwt_strategy_1 = require("./strategies/jwt.strategy");
+const google_strategy_1 = require("./strategies/google.strategy");
 const users_module_1 = require("../users/users.module");
-const optionalProviders = [];
-try {
-    if (process.env.GOOGLE_CLIENT_ID) {
-        const { GoogleStrategy } = require('./strategies/google.strategy');
-        optionalProviders.push(GoogleStrategy);
-    }
-}
-catch { }
 let AuthModule = class AuthModule {
 };
 exports.AuthModule = AuthModule;
@@ -39,7 +32,7 @@ exports.AuthModule = AuthModule = __decorate([
                 }),
             }),
         ],
-        providers: [auth_service_1.AuthService, jwt_strategy_1.JwtStrategy, ...optionalProviders],
+        providers: [auth_service_1.AuthService, jwt_strategy_1.JwtStrategy, google_strategy_1.GoogleStrategy],
         controllers: [auth_controller_1.AuthController],
         exports: [auth_service_1.AuthService],
     })
