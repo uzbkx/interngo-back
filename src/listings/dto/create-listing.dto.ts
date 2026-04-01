@@ -71,6 +71,14 @@ export class CreateListingDto {
   organizationName?: string;
 
   @IsOptional()
+  @IsString()
+  organizationId?: string;
+
+  @IsOptional()
+  @IsString()
+  postedBy?: string;
+
+  @IsOptional()
   @IsArray()
   @IsString({ each: true })
   categories?: string[];

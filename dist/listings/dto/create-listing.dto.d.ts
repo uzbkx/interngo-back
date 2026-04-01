@@ -16,5 +16,7 @@ export declare class CreateListingDto {
     country?: string;
     city?: string;
     organizationName?: string;
+    organizationId?: string;
+    postedBy?: string;
     categories?: string[];
 }
