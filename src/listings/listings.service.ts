@@ -65,13 +65,18 @@ export class ListingsService {
     const existing = await this.listingModel.findOne({ slug });
     const finalSlug = existing ? `${slug}-${Date.now().toString(36)}` : slug;
 
-    return this.listingModel.create({
+    // Auto-publish user submissions immediately
+    const listing = await this.listingModel.create({
       ...dto,
       slug: finalSlug,
+      status: ListingStatus.PUBLISHED,
+      source: 'USER_SUBMITTED',
       deadline: dto.deadline ? new Date(dto.deadline) : undefined,
       startDate: dto.startDate ? new Date(dto.startDate) : undefined,
       endDate: dto.endDate ? new Date(dto.endDate) : undefined,
     });
+
+    return listing;
   }
 
   async update(id: string, dto: UpdateListingDto) {

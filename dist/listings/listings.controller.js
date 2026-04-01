@@ -21,9 +21,11 @@ const query_listings_dto_1 = require("./dto/query-listings.dto");
 const public_decorator_1 = require("../common/decorators/public.decorator");
 const admin_or_secret_guard_1 = require("../common/guards/admin-or-secret.guard");
 const parse_object_id_pipe_1 = require("../common/pipes/parse-object-id.pipe");
+const listings_moderator_service_1 = require("./listings-moderator.service");
 let ListingsController = class ListingsController {
-    constructor(listingsService) {
+    constructor(listingsService, moderatorService) {
         this.listingsService = listingsService;
+        this.moderatorService = moderatorService;
     }
     async findAll(query, res) {
         const data = await this.listingsService.findPublished(query);
@@ -40,8 +42,12 @@ let ListingsController = class ListingsController {
         res.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=600');
         res.json(data);
     }
-    create(dto) {
-        return this.listingsService.create(dto);
+    async create(dto) {
+        const listing = await this.listingsService.create(dto);
+        this.moderatorService.moderateListing(listing._id.toString()).catch((err) => {
+            console.error('[Moderator] Background moderation failed:', err);
+        });
+        return listing;
     }
     update(id, dto) {
         return this.listingsService.update(id, dto);
@@ -86,7 +92,7 @@ __decorate([
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [create_listing_dto_1.CreateListingDto]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], ListingsController.prototype, "create", null);
 __decorate([
     (0, common_1.UseGuards)(admin_or_secret_guard_1.AdminOrSecretGuard),
@@ -115,6 +121,7 @@ __decorate([
 ], ListingsController.prototype, "remove", null);
 exports.ListingsController = ListingsController = __decorate([
     (0, common_1.Controller)('listings'),
-    __metadata("design:paramtypes", [listings_service_1.ListingsService])
+    __metadata("design:paramtypes", [listings_service_1.ListingsService,
+        listings_moderator_service_1.ListingsModeratorService])
 ], ListingsController);
 //# sourceMappingURL=listings.controller.js.map

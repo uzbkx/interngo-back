@@ -12,6 +12,7 @@ const mongoose_1 = require("@nestjs/mongoose");
 const listing_schema_1 = require("./schemas/listing.schema");
 const category_schema_1 = require("./schemas/category.schema");
 const listings_service_1 = require("./listings.service");
+const listings_moderator_service_1 = require("./listings-moderator.service");
 const listings_controller_1 = require("./listings.controller");
 let ListingsModule = class ListingsModule {
 };
@@ -24,7 +25,7 @@ exports.ListingsModule = ListingsModule = __decorate([
                 { name: category_schema_1.Category.name, schema: category_schema_1.CategorySchema },
             ]),
         ],
-        providers: [listings_service_1.ListingsService],
+        providers: [listings_service_1.ListingsService, listings_moderator_service_1.ListingsModeratorService],
         controllers: [listings_controller_1.ListingsController],
         exports: [listings_service_1.ListingsService, mongoose_1.MongooseModule],
     })

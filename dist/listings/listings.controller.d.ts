@@ -3,9 +3,11 @@ import { ListingsService } from './listings.service';
 import { CreateListingDto } from './dto/create-listing.dto';
 import { UpdateListingDto } from './dto/update-listing.dto';
 import { QueryListingsDto } from './dto/query-listings.dto';
+import { ListingsModeratorService } from './listings-moderator.service';
 export declare class ListingsController {
     private listingsService;
-    constructor(listingsService: ListingsService);
+    private moderatorService;
+    constructor(listingsService: ListingsService, moderatorService: ListingsModeratorService);
     findAll(query: QueryListingsDto, res: Response): Promise<void>;
     findBySlug(slug: string, res: Response): Promise<void>;
     findArchived(query: QueryListingsDto, res: Response): Promise<void>;

@@ -69,13 +69,16 @@ let ListingsService = class ListingsService {
         const slug = this.slugify(dto.title);
         const existing = await this.listingModel.findOne({ slug });
         const finalSlug = existing ? `${slug}-${Date.now().toString(36)}` : slug;
-        return this.listingModel.create({
+        const listing = await this.listingModel.create({
             ...dto,
             slug: finalSlug,
+            status: listing_schema_1.ListingStatus.PUBLISHED,
+            source: 'USER_SUBMITTED',
             deadline: dto.deadline ? new Date(dto.deadline) : undefined,
             startDate: dto.startDate ? new Date(dto.startDate) : undefined,
             endDate: dto.endDate ? new Date(dto.endDate) : undefined,
         });
+        return listing;
     }
     async update(id, dto) {
         const listing = await this.listingModel.findByIdAndUpdate(id, dto, { new: true });

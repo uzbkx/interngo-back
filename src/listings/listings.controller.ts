@@ -18,10 +18,14 @@ import { QueryListingsDto } from './dto/query-listings.dto';
 import { Public } from '../common/decorators/public.decorator';
 import { AdminOrSecretGuard } from '../common/guards/admin-or-secret.guard';
 import { ParseObjectIdPipe } from '../common/pipes/parse-object-id.pipe';
+import { ListingsModeratorService } from './listings-moderator.service';
 
 @Controller('listings')
 export class ListingsController {
-  constructor(private listingsService: ListingsService) {}
+  constructor(
+    private listingsService: ListingsService,
+    private moderatorService: ListingsModeratorService,
+  ) {}
 
   @Public()
   @Get()
@@ -48,8 +52,15 @@ export class ListingsController {
   }
 
   @Post()
-  create(@Body() dto: CreateListingDto) {
-    return this.listingsService.create(dto);
+  async create(@Body() dto: CreateListingDto) {
+    const listing = await this.listingsService.create(dto);
+
+    // AI moderation runs in background — doesn't block the response
+    this.moderatorService.moderateListing((listing as any)._id.toString()).catch((err) => {
+      console.error('[Moderator] Background moderation failed:', err);
+    });
+
+    return listing;
   }
 
   @UseGuards(AdminOrSecretGuard)
