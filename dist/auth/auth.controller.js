@@ -64,8 +64,9 @@ let AuthController = class AuthController {
     setRefreshCookie(res, token) {
         res.cookie('refreshToken', token, {
             httpOnly: true,
-            secure: this.configService.get('NODE_ENV') === 'production',
-            sameSite: 'lax',
+            secure: true,
+            sameSite: 'none',
+            domain: '.interngo.uz',
             maxAge: 7 * 24 * 60 * 60 * 1000,
         });
     }
