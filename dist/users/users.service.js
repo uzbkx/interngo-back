@@ -36,6 +36,12 @@ let UsersService = class UsersService {
     async findByIdPublic(id) {
         return this.userModel.findById(id);
     }
+    async updateProfile(id, dto) {
+        const user = await this.userModel.findByIdAndUpdate(id, dto, { new: true });
+        if (!user)
+            throw new Error('User not found');
+        return user;
+    }
 };
 exports.UsersService = UsersService;
 exports.UsersService = UsersService = __decorate([

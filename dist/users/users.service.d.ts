@@ -1,5 +1,6 @@
 import { Model } from 'mongoose';
 import { User, UserDocument } from './schemas/user.schema';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 export declare class UsersService {
     private userModel;
     constructor(userModel: Model<UserDocument>);
@@ -8,4 +9,5 @@ export declare class UsersService {
     create(data: Partial<User>): Promise<UserDocument>;
     updateRefreshToken(id: string, refreshToken: string | null): Promise<void>;
     findByIdPublic(id: string): Promise<UserDocument | null>;
+    updateProfile(id: string, dto: UpdateProfileDto): Promise<UserDocument>;
 }
