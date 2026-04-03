@@ -4,6 +4,7 @@ import { Listing, ListingSchema } from './schemas/listing.schema';
 import { Category, CategorySchema } from './schemas/category.schema';
 import { ListingsService } from './listings.service';
 import { ListingsModeratorService } from './listings-moderator.service';
+import { ListingsTelegramService } from './listings-telegram.service';
 import { ListingsController } from './listings.controller';
 
 @Module({
@@ -13,8 +14,8 @@ import { ListingsController } from './listings.controller';
       { name: Category.name, schema: CategorySchema },
     ]),
   ],
-  providers: [ListingsService, ListingsModeratorService],
+  providers: [ListingsService, ListingsModeratorService, ListingsTelegramService],
   controllers: [ListingsController],
-  exports: [ListingsService, MongooseModule],
+  exports: [ListingsService, ListingsTelegramService, MongooseModule],
 })
 export class ListingsModule {}

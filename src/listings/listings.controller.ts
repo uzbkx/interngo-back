@@ -19,12 +19,14 @@ import { Public } from '../common/decorators/public.decorator';
 import { AdminOrSecretGuard } from '../common/guards/admin-or-secret.guard';
 import { ParseObjectIdPipe } from '../common/pipes/parse-object-id.pipe';
 import { ListingsModeratorService } from './listings-moderator.service';
+import { ListingsTelegramService } from './listings-telegram.service';
 
 @Controller('listings')
 export class ListingsController {
   constructor(
     private listingsService: ListingsService,
     private moderatorService: ListingsModeratorService,
+    private telegramService: ListingsTelegramService,
   ) {}
 
   @Public()
@@ -55,9 +57,14 @@ export class ListingsController {
   async create(@Body() dto: CreateListingDto) {
     const listing = await this.listingsService.create(dto);
 
-    // AI moderation runs in background — doesn't block the response
+    // AI moderation runs in background
     this.moderatorService.moderateListing((listing as any)._id.toString()).catch((err) => {
       console.error('[Moderator] Background moderation failed:', err);
+    });
+
+    // Post to Telegram channel
+    this.telegramService.postListing(listing as any).catch((err) => {
+      console.error('[Telegram] Background post failed:', err);
     });
 
     return listing;

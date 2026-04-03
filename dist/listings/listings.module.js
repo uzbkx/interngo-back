@@ -13,6 +13,7 @@ const listing_schema_1 = require("./schemas/listing.schema");
 const category_schema_1 = require("./schemas/category.schema");
 const listings_service_1 = require("./listings.service");
 const listings_moderator_service_1 = require("./listings-moderator.service");
+const listings_telegram_service_1 = require("./listings-telegram.service");
 const listings_controller_1 = require("./listings.controller");
 let ListingsModule = class ListingsModule {
 };
@@ -25,9 +26,9 @@ exports.ListingsModule = ListingsModule = __decorate([
                 { name: category_schema_1.Category.name, schema: category_schema_1.CategorySchema },
             ]),
         ],
-        providers: [listings_service_1.ListingsService, listings_moderator_service_1.ListingsModeratorService],
+        providers: [listings_service_1.ListingsService, listings_moderator_service_1.ListingsModeratorService, listings_telegram_service_1.ListingsTelegramService],
         controllers: [listings_controller_1.ListingsController],
-        exports: [listings_service_1.ListingsService, mongoose_1.MongooseModule],
+        exports: [listings_service_1.ListingsService, listings_telegram_service_1.ListingsTelegramService, mongoose_1.MongooseModule],
     })
 ], ListingsModule);
 //# sourceMappingURL=listings.module.js.map

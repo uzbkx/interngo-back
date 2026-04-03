@@ -22,15 +22,17 @@ const scouter_run_schema_1 = require("./schemas/scouter-run.schema");
 const listing_schema_1 = require("../listings/schemas/listing.schema");
 const scouter_ai_service_1 = require("./scouter-ai.service");
 const scouter_scraper_service_1 = require("./scouter-scraper.service");
+const listings_telegram_service_1 = require("../listings/listings-telegram.service");
 const AUTO_APPROVE_CONFIDENCE = 75;
 let ScouterService = class ScouterService {
-    constructor(sourceModel, resultModel, runModel, listingModel, aiService, scraperService) {
+    constructor(sourceModel, resultModel, runModel, listingModel, aiService, scraperService, telegramService) {
         this.sourceModel = sourceModel;
         this.resultModel = resultModel;
         this.runModel = runModel;
         this.listingModel = listingModel;
         this.aiService = aiService;
         this.scraperService = scraperService;
+        this.telegramService = telegramService;
     }
     async getSources() {
         return this.sourceModel.find().sort({ createdAt: -1 });
@@ -265,6 +267,18 @@ let ScouterService = class ScouterService {
             endDate: opp.endDate ? new Date(opp.endDate) : undefined,
             applyUrl: opp.applyUrl || sourceUrl,
         });
+        if (shouldAutoApprove) {
+            this.telegramService.postListing({
+                title: opp.title,
+                slug,
+                type: opp.type || 'OTHER',
+                description: opp.description,
+                country: opp.country,
+                deadline: opp.deadline ? new Date(opp.deadline) : undefined,
+                isPaid: opp.isPaid,
+                isRemote: opp.isRemote,
+            }).catch(() => { });
+        }
         return { autoApproved: shouldAutoApprove };
     }
     slugify(text) {
@@ -288,6 +302,7 @@ exports.ScouterService = ScouterService = __decorate([
         mongoose_2.Model,
         mongoose_2.Model,
         scouter_ai_service_1.ScouterAiService,
-        scouter_scraper_service_1.ScouterScraperService])
+        scouter_scraper_service_1.ScouterScraperService,
+        listings_telegram_service_1.ListingsTelegramService])
 ], ScouterService);
 //# sourceMappingURL=scouter.service.js.map

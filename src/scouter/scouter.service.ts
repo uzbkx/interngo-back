@@ -7,6 +7,7 @@ import { ScouterRun, ScouterRunDocument } from './schemas/scouter-run.schema';
 import { Listing, ListingDocument, ListingStatus, ListingSource } from '../listings/schemas/listing.schema';
 import { ScouterAiService, ExtractedOpportunity } from './scouter-ai.service';
 import { ScouterScraperService } from './scouter-scraper.service';
+import { ListingsTelegramService } from '../listings/listings-telegram.service';
 
 const AUTO_APPROVE_CONFIDENCE = 75;
 
@@ -29,6 +30,7 @@ export class ScouterService {
     @InjectModel(Listing.name) private listingModel: Model<ListingDocument>,
     private aiService: ScouterAiService,
     private scraperService: ScouterScraperService,
+    private telegramService: ListingsTelegramService,
   ) {}
 
   // --- Sources CRUD ---
@@ -311,6 +313,20 @@ export class ScouterService {
       endDate: opp.endDate ? new Date(opp.endDate) : undefined,
       applyUrl: opp.applyUrl || sourceUrl,
     });
+
+    // Post auto-approved listings to Telegram
+    if (shouldAutoApprove) {
+      this.telegramService.postListing({
+        title: opp.title,
+        slug,
+        type: opp.type || 'OTHER',
+        description: opp.description,
+        country: opp.country,
+        deadline: opp.deadline ? new Date(opp.deadline) : undefined,
+        isPaid: opp.isPaid,
+        isRemote: opp.isRemote,
+      }).catch(() => {});
+    }
 
     return { autoApproved: shouldAutoApprove };
   }

@@ -22,10 +22,12 @@ const public_decorator_1 = require("../common/decorators/public.decorator");
 const admin_or_secret_guard_1 = require("../common/guards/admin-or-secret.guard");
 const parse_object_id_pipe_1 = require("../common/pipes/parse-object-id.pipe");
 const listings_moderator_service_1 = require("./listings-moderator.service");
+const listings_telegram_service_1 = require("./listings-telegram.service");
 let ListingsController = class ListingsController {
-    constructor(listingsService, moderatorService) {
+    constructor(listingsService, moderatorService, telegramService) {
         this.listingsService = listingsService;
         this.moderatorService = moderatorService;
+        this.telegramService = telegramService;
     }
     async findAll(query, res) {
         const data = await this.listingsService.findPublished(query);
@@ -46,6 +48,9 @@ let ListingsController = class ListingsController {
         const listing = await this.listingsService.create(dto);
         this.moderatorService.moderateListing(listing._id.toString()).catch((err) => {
             console.error('[Moderator] Background moderation failed:', err);
+        });
+        this.telegramService.postListing(listing).catch((err) => {
+            console.error('[Telegram] Background post failed:', err);
         });
         return listing;
     }
@@ -122,6 +127,7 @@ __decorate([
 exports.ListingsController = ListingsController = __decorate([
     (0, common_1.Controller)('listings'),
     __metadata("design:paramtypes", [listings_service_1.ListingsService,
-        listings_moderator_service_1.ListingsModeratorService])
+        listings_moderator_service_1.ListingsModeratorService,
+        listings_telegram_service_1.ListingsTelegramService])
 ], ListingsController);
 //# sourceMappingURL=listings.controller.js.map

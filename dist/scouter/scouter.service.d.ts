@@ -5,6 +5,7 @@ import { ScouterRun, ScouterRunDocument } from './schemas/scouter-run.schema';
 import { ListingDocument } from '../listings/schemas/listing.schema';
 import { ScouterAiService } from './scouter-ai.service';
 import { ScouterScraperService } from './scouter-scraper.service';
+import { ListingsTelegramService } from '../listings/listings-telegram.service';
 export interface ScoutResult {
     sourceId: string;
     sourceName: string;
@@ -21,7 +22,8 @@ export declare class ScouterService {
     private listingModel;
     private aiService;
     private scraperService;
-    constructor(sourceModel: Model<ScoutedSourceDocument>, resultModel: Model<ScoutedResultDocument>, runModel: Model<ScouterRunDocument>, listingModel: Model<ListingDocument>, aiService: ScouterAiService, scraperService: ScouterScraperService);
+    private telegramService;
+    constructor(sourceModel: Model<ScoutedSourceDocument>, resultModel: Model<ScoutedResultDocument>, runModel: Model<ScouterRunDocument>, listingModel: Model<ListingDocument>, aiService: ScouterAiService, scraperService: ScouterScraperService, telegramService: ListingsTelegramService);
     getSources(): Promise<(import("mongoose").Document<unknown, {}, import("mongoose").Document<unknown, {}, ScoutedSource, {}, {}> & ScoutedSource & {
         _id: Types.ObjectId;
     } & {

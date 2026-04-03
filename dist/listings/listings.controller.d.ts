@@ -4,10 +4,12 @@ import { CreateListingDto } from './dto/create-listing.dto';
 import { UpdateListingDto } from './dto/update-listing.dto';
 import { QueryListingsDto } from './dto/query-listings.dto';
 import { ListingsModeratorService } from './listings-moderator.service';
+import { ListingsTelegramService } from './listings-telegram.service';
 export declare class ListingsController {
     private listingsService;
     private moderatorService;
-    constructor(listingsService: ListingsService, moderatorService: ListingsModeratorService);
+    private telegramService;
+    constructor(listingsService: ListingsService, moderatorService: ListingsModeratorService, telegramService: ListingsTelegramService);
     findAll(query: QueryListingsDto, res: Response): Promise<void>;
     findBySlug(slug: string, res: Response): Promise<void>;
     findArchived(query: QueryListingsDto, res: Response): Promise<void>;
