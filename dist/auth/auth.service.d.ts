@@ -43,6 +43,12 @@ export declare class AuthService {
     } & {
         __v: number;
     }>;
+    requestPasswordReset(email: string): Promise<{
+        message: string;
+    }>;
+    resetPassword(token: string, newPassword: string): Promise<{
+        message: string;
+    }>;
     generateTokens(userId: string, email: string, role: string): Promise<{
         accessToken: string;
         refreshToken: string;

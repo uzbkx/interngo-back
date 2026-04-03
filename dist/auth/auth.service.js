@@ -78,6 +78,36 @@ let AuthService = class AuthService {
         }
         return user;
     }
+    async requestPasswordReset(email) {
+        const user = await this.usersService.findByEmail(email);
+        if (!user) {
+            return { message: 'If an account exists with this email, a reset link has been sent.' };
+        }
+        const resetToken = await this.jwtService.signAsync({ sub: user._id.toString(), email: user.email, type: 'reset' }, {
+            secret: this.configService.get('JWT_SECRET'),
+            expiresIn: '1h',
+        });
+        const frontendUrl = this.configService.get('FRONTEND_URL', 'http://localhost:3000');
+        const resetLink = `${frontendUrl}/auth/reset-password?token=${resetToken}`;
+        console.log(`[Auth] Password reset link for ${email}: ${resetLink}`);
+        return { message: 'If an account exists with this email, a reset link has been sent.' };
+    }
+    async resetPassword(token, newPassword) {
+        try {
+            const payload = await this.jwtService.verifyAsync(token, {
+                secret: this.configService.get('JWT_SECRET'),
+            });
+            if (payload.type !== 'reset') {
+                throw new common_1.UnauthorizedException('Invalid reset token');
+            }
+            const hashedPassword = await bcrypt.hash(newPassword, 12);
+            await this.usersService.updatePassword(payload.sub, hashedPassword);
+            return { message: 'Password updated successfully' };
+        }
+        catch {
+            throw new common_1.UnauthorizedException('Invalid or expired reset token');
+        }
+    }
     async generateTokens(userId, email, role) {
         const payload = { sub: userId, email, role };
         const [accessToken, refreshToken] = await Promise.all([

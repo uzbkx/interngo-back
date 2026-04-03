@@ -32,6 +32,17 @@ export declare class AuthController {
     me(user: any): Promise<{
         user: any;
     }>;
+    forgotPassword(body: {
+        email: string;
+    }): Promise<{
+        message: string;
+    }>;
+    resetPassword(body: {
+        token: string;
+        password: string;
+    }): Promise<{
+        message: string;
+    }>;
     refresh(req: Request, res: Response): Promise<{
         error: string;
         accessToken?: undefined;

@@ -98,6 +98,49 @@ export class AuthService {
     return user;
   }
 
+  async requestPasswordReset(email: string) {
+    const user = await this.usersService.findByEmail(email);
+    if (!user) {
+      // Don't reveal if email exists
+      return { message: 'If an account exists with this email, a reset link has been sent.' };
+    }
+
+    const resetToken = await this.jwtService.signAsync(
+      { sub: user._id.toString(), email: user.email, type: 'reset' },
+      {
+        secret: this.configService.get<string>('JWT_SECRET')!,
+        expiresIn: '1h',
+      },
+    );
+
+    const frontendUrl = this.configService.get<string>('FRONTEND_URL', 'http://localhost:3000');
+    const resetLink = `${frontendUrl}/auth/reset-password?token=${resetToken}`;
+
+    // TODO: Send email with resetLink
+    console.log(`[Auth] Password reset link for ${email}: ${resetLink}`);
+
+    return { message: 'If an account exists with this email, a reset link has been sent.' };
+  }
+
+  async resetPassword(token: string, newPassword: string) {
+    try {
+      const payload = await this.jwtService.verifyAsync(token, {
+        secret: this.configService.get<string>('JWT_SECRET')!,
+      });
+
+      if (payload.type !== 'reset') {
+        throw new UnauthorizedException('Invalid reset token');
+      }
+
+      const hashedPassword = await bcrypt.hash(newPassword, 12);
+      await this.usersService.updatePassword(payload.sub, hashedPassword);
+
+      return { message: 'Password updated successfully' };
+    } catch {
+      throw new UnauthorizedException('Invalid or expired reset token');
+    }
+  }
+
   async generateTokens(userId: string, email: string, role: string) {
     const payload = { sub: userId, email, role };
 

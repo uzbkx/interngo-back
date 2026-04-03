@@ -36,6 +36,9 @@ let UsersService = class UsersService {
     async findByIdPublic(id) {
         return this.userModel.findById(id);
     }
+    async updatePassword(id, hashedPassword) {
+        await this.userModel.findByIdAndUpdate(id, { password: hashedPassword });
+    }
     async updateProfile(id, dto) {
         const user = await this.userModel.findByIdAndUpdate(id, dto, { new: true });
         if (!user)

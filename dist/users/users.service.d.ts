@@ -9,5 +9,6 @@ export declare class UsersService {
     create(data: Partial<User>): Promise<UserDocument>;
     updateRefreshToken(id: string, refreshToken: string | null): Promise<void>;
     findByIdPublic(id: string): Promise<UserDocument | null>;
+    updatePassword(id: string, hashedPassword: string): Promise<void>;
     updateProfile(id: string, dto: UpdateProfileDto): Promise<UserDocument>;
 }

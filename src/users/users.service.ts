@@ -28,6 +28,10 @@ export class UsersService {
     return this.userModel.findById(id);
   }
 
+  async updatePassword(id: string, hashedPassword: string): Promise<void> {
+    await this.userModel.findByIdAndUpdate(id, { password: hashedPassword });
+  }
+
   async updateProfile(id: string, dto: UpdateProfileDto): Promise<UserDocument> {
     const user = await this.userModel.findByIdAndUpdate(id, dto, { new: true });
     if (!user) throw new Error('User not found');
