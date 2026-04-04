@@ -28,7 +28,6 @@ let ScouterScheduler = class ScouterScheduler {
         await this.scouterService.runAutoDiscovery();
     }
     async scheduleCleanup() {
-        console.log('[Scheduler] Starting cleanup');
         const closed = await this.listingsService.closeExpired();
         const archived = await this.listingsService.archiveOld();
         if (closed > 0 || archived > 0) {
@@ -38,13 +37,13 @@ let ScouterScheduler = class ScouterScheduler {
 };
 exports.ScouterScheduler = ScouterScheduler;
 __decorate([
-    (0, schedule_1.Cron)('0 * * * *'),
+    (0, schedule_1.Cron)('0 */4 * * *'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], ScouterScheduler.prototype, "scheduleScoutAll", null);
 __decorate([
-    (0, schedule_1.Cron)('0 */12 * * *'),
+    (0, schedule_1.Cron)('0 3 * * *'),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
